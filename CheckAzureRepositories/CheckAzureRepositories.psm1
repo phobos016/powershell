@@ -53,6 +53,17 @@ function GetBuildStatus {
     return GetWebRequest -authToken $authToken -uri "https://$($coreServer)/$($organisation)/$($projectId)/_apis/git/repositories/$($repoId)/commits/$($commitId)/statuses?api-version=5.1&latestOnly=true&top=1"
 }
 
+function ListBuildsForRepository{
+    param(
+        [string] $authToken,
+        [string] $coreServer,
+        [string] $organisation,
+        [string] $projectId,
+        [string] $repoId
+    )
+    return GetWebRequest -authToken $authToken -uri "https://$($coreServer)/$($organisation)/$($projectId)/_apis/build/builds?repositoryId=$($repoId)&api-version=5.1"
+}
+
 function WriteTableRow {
     param(
         [Microsoft.Azure.Cosmos.Table.CloudTable] $tableParam,

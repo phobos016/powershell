@@ -26,7 +26,7 @@ function CheckAzureRepositories {
     Import-Module $PSScriptRoot\CheckAzureRepositories.psm1 -force
     
     try {
-        Connect-AzAccount
+        #Connect-AzAccount
         Set-AzContext -SubscriptionId $subscriptionId
     
         $projects = GetProjects `
@@ -71,6 +71,13 @@ function CheckAzureRepositories {
                 $buildDefinitionName = $null
     
                 $commit = GetLastCommit `
+                            -authToken $authToken `
+                            -coreServer $coreServer `
+                            -organisation $organisation `
+                            -projectId $projectId `
+                            -repoId $repoId
+
+                $builds = ListBuildsForRepository `
                             -authToken $authToken `
                             -coreServer $coreServer `
                             -organisation $organisation `
