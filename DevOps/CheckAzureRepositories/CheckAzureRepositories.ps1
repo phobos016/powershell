@@ -26,7 +26,7 @@ function CheckAzureRepositories {
     Import-Module $PSScriptRoot\CheckAzureRepositories.psm1 -force
     
     try {
-        $authHeader = @{Authorization = 'Basic ' + [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$($AzureDevOpsPAT)")) }
+        $authHeader = @{Authorization = 'Basic ' + [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$($personalAccessToken)")) }
 
 
         $projects = GetProjects `
