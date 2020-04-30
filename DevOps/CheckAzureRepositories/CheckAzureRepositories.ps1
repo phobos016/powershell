@@ -12,7 +12,7 @@ function CheckAzureRepositories {
         [Parameter(Mandatory = $true)]
         [string] $organisation,
         [Parameter(Mandatory = $true)]
-        [string] $authToken,
+        [string] $personalAccessToken,
         [Parameter(Mandatory = $true)]
         [Int16] $staleMonths,
         [Parameter(Mandatory = $true)]
@@ -26,11 +26,11 @@ function CheckAzureRepositories {
     Import-Module $PSScriptRoot\CheckAzureRepositories.psm1 -force
     
     try {
-        #Connect-AzAccount
-        Set-AzContext -SubscriptionId $subscriptionId
-    
+        $authHeader = @{Authorization = 'Basic ' + [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$($AzureDevOpsPAT)")) }
+
+
         $projects = GetProjects `
-                        -authToken $authToken `
+                        -authHeader $authHeader `
                         -coreServer $coreServer `
                         -organisation $organisation
                         
@@ -52,7 +52,7 @@ function CheckAzureRepositories {
             $projectName = $_.name
             Write-Host "Project ($($projectName)) :  $($projectId)"
             $repos = GetRepos `
-                        -authToken $authToken `
+                        -authHeader $authHeader `
                         -coreServer $coreServer `
                         -organisation $organisation `
                         -projectId $projectId
@@ -71,14 +71,14 @@ function CheckAzureRepositories {
                 $buildDefinitionName = $null
     
                 $commit = GetLastCommit `
-                            -authToken $authToken `
+                            -authHeader $authHeader `
                             -coreServer $coreServer `
                             -organisation $organisation `
                             -projectId $projectId `
                             -repoId $repoId
 
                 $builds = ListBuildsForRepository `
-                            -authToken $authToken `
+                            -authHeader $authHeader `
                             -coreServer $coreServer `
                             -organisation $organisation `
                             -projectId $projectId `
@@ -88,7 +88,7 @@ function CheckAzureRepositories {
                     $lastCommitUri = $commit.url
                     
                     $status = GetBuildStatus `
-                                -authToken $authToken `
+                                -authHeader $authHeader `
                                 -coreServer $coreServer `
                                 -organisation $organisation `
                                 -projectId $projectId `

@@ -1,39 +1,39 @@
 function GetWebRequest {
     param(
         [string] $uri,
-        [string] $authToken
+        [object] $authHeader
     )
-    return ConvertFrom-Json (Invoke-WebRequest -Headers @{ Authorization = "Basic $($authToken)" } -Method Get -Uri $uri -UseBasicParsing -TimeoutSec 300).Content
+    return ConvertFrom-Json (Invoke-WebRequest -Headers $authHeader -Method Get -Uri $uri -UseBasicParsing -TimeoutSec 300).Content
 }
 
 function GetProjects {
     param(
-        [string] $authToken,
         [string] $coreServer,
-        [string] $organisation
+        [string] $organisation,
+        [object] $authHeader
     )
-    return GetWebRequest -authToken $authToken -uri "https://$($coreServer)/$($organisation)/_apis/projects?api-version=5.1" 
+    return GetWebRequest -authToken $authHeader -uri "https://$($coreServer)/$($organisation)/_apis/projects?api-version=5.1" 
 }
 
 function GetRepos {
     param(
-        [string] $authToken,
         [string] $coreServer,
         [string] $organisation,
-        [string] $projectId
+        [string] $projectId,
+        [object] $authHeader
     )
-    return GetWebRequest -authToken $authToken -uri "https://$($coreServer)/$($organisation)/$($projectId)/_apis/git/repositories?includeLinks=true&includeAllUrls=true&includeHidden=true&api-version=5.1"
+    return GetWebRequest -authToken $authHeader -uri "https://$($coreServer)/$($organisation)/$($projectId)/_apis/git/repositories?includeLinks=true&includeAllUrls=true&includeHidden=true&api-version=5.1"
 }
 
 function GetLastCommit {
     param(
-        [string] $authToken,
         [string] $coreServer,
         [string] $organisation,
         [string] $projectId,
-        [string] $repoId
+        [string] $repoId,
+        [object] $authHeader
     )
-    $commits = GetWebRequest -authToken $authToken -uri "https://$($coreServer)/$($organisation)/$($projectId)/_apis/git/repositories/$($repoId)/commits?api-version=5.1&searchCriteria.excludeDeletes=true" 
+    $commits = GetWebRequest -authToken $authHeader -uri "https://$($coreServer)/$($organisation)/$($projectId)/_apis/git/repositories/$($repoId)/commits?api-version=5.1&searchCriteria.excludeDeletes=true" 
     if ($commits.count -gt 0) {
         $sorted = $commits.value | Sort-Object -Property author.date -Descending
         $last = $sorted[0]
@@ -43,14 +43,14 @@ function GetLastCommit {
 
 function GetBuildStatus {
     param(
-        [string] $authToken,
         [string] $coreServer,
         [string] $organisation,
         [string] $projectId,
         [string] $repoId,
-        [string] $commitId
+        [string] $commitId,
+        [object] $authHeader
     )
-    return GetWebRequest -authToken $authToken -uri "https://$($coreServer)/$($organisation)/$($projectId)/_apis/git/repositories/$($repoId)/commits/$($commitId)/statuses?api-version=5.1&latestOnly=true&top=1"
+    return GetWebRequest -authToken $authHeader -uri "https://$($coreServer)/$($organisation)/$($projectId)/_apis/git/repositories/$($repoId)/commits/$($commitId)/statuses?api-version=5.1&latestOnly=true&top=1"
 }
 
 function ListBuildsForRepository{
@@ -59,9 +59,10 @@ function ListBuildsForRepository{
         [string] $coreServer,
         [string] $organisation,
         [string] $projectId,
-        [string] $repoId
+        [string] $repoId,
+        [object] $authHeader
     )
-    return GetWebRequest -authToken $authToken -uri "https://$($coreServer)/$($organisation)/$($projectId)/_apis/build/builds?repositoryId=$($repoId)&api-version=5.1"
+    return GetWebRequest -authToken $authHeader -uri "https://$($coreServer)/$($organisation)/$($projectId)/_apis/build/builds?repositoryId=$($repoId)&api-version=5.1"
 }
 
 function WriteTableRow {
